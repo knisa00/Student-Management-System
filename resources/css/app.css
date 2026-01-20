@@ -1,0 +1,113 @@
+:root {
+    --soft-blue: #E3F2FD;
+    --soft-lavender: #F3E5F5;
+    --soft-mint: #E8F5E9;
+    --dark-text: #263238;
+    --hover-blue: #BBDEFB;
+}
+
+body {
+    background-color: #f9f9f9;
+    color: var(--dark-text);
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    line-height: 1.6;
+}
+
+.navbar {
+    background-color: var(--soft-blue) !important;
+    border-bottom: 1px solid #bbdefb;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+.navbar-brand,
+.nav-link {
+    color: var(--dark-text) !important;
+    font-weight: 500;
+    transition: color 0.2s;
+}
+
+.navbar-brand:hover,
+.nav-link:hover {
+    color: #1a237e !important;
+}
+
+.card {
+    border: none;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    border-radius: 12px;
+    background-color: white;
+    transition: transform 0.2s ease;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+}
+
+.card-header {
+    background-color: var(--soft-lavender);
+    border-radius: 12px 12px 0 0;
+    font-weight: 600;
+    padding: 1rem 1.5rem;
+}
+
+.btn-primary {
+    background-color: var(--soft-blue);
+    border-color: var(--soft-blue);
+    color: var(--dark-text);
+    font-weight: 500;
+    border-radius: 8px;
+    padding: 0.5rem 1rem;
+}
+
+.btn-primary:hover {
+    background-color: var(--hover-blue);
+    border-color: var(--hover-blue);
+    color: var(--dark-text);
+}
+
+.btn-outline-danger {
+    border-color: #f44336;
+    color: #f44336;
+}
+
+.btn-outline-danger:hover {
+    background-color: #f44336;
+    color: white;
+}
+
+.badge {
+    font-weight: 500;
+    padding: 0.5em 0.75em;
+    border-radius: 1rem;
+}
+
+.alert {
+    border-radius: 8px;
+    padding: 1rem;
+}
+
+.table th,
+.table td {
+    vertical-align: middle;
+}
+
+.form-control {
+    border-radius: 8px;
+    padding: 0.5rem 1rem;
+}
+
+.input-group .form-control {
+    border-radius: 8px 0 0 8px;
+}
+
+.input-group .btn {
+    border-radius: 0 8px 8px 0;
+}
+
+.min-vh-100 {
+    min-height: 100vh;
+}
+
+.bg-primary.bg-opacity-10 {
+    background-color: rgba(33, 150, 243, 0.1) !important;
+}

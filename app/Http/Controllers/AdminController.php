@@ -1,0 +1,127 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Log;
+use App\Models\Course;
+use App\Models\Registration;
+use App\Mail\RegistrationApproved;
+
+class AdminController extends Controller
+{
+    public function dashboard()
+    {
+        $courses = Course::all();
+        return view('admin.dashboard', compact('courses'));
+    }
+
+    public function courses()
+    {
+        $courses = Course::with('lecturer.user')->get();
+        $lecturers = \App\Models\Lecturer::with('user')->get();
+        return view('admin.courses', compact('courses', 'lecturers'));
+    }
+
+    public function students()
+    {
+        $students = \App\Models\Student::with('user')->get();
+        return view('admin.students', compact('students'));
+    }
+
+    public function registrations()
+    {
+        $registrations = \App\Models\Registration::where('status', 'pending')->with(['student.user', 'course'])->get();
+        return view('admin.registrations', compact('registrations'));
+    }
+
+    // Store new course
+    public function store(Request $request)
+    {
+        $request->validate([
+            'course_code' => 'required|unique:courses',
+            'name' => 'required',
+            'credit_hours' => 'required|integer|min:1',
+            'max_students' => 'required|integer|min:1',
+            'semester' => 'required',
+            'lecturer_id' => 'nullable|exists:lecturers,id'
+        ]);
+
+        Course::create([
+            'course_code' => $request->course_code,
+            'title' => $request->name,
+            'credit_hours' => $request->credit_hours,
+            'max_students' => $request->max_students,
+            'semester' => $request->semester,
+            'lecturer_id' => $request->lecturer_id
+        ]);
+
+        return redirect()->route('admin.courses')->with('success', 'Course added successfully!');
+    }
+
+    // Show edit form
+    public function edit(Course $course)
+    {
+        $lecturers = \App\Models\Lecturer::with('user')->get();
+        return view('admin.edit_course', compact('course', 'lecturers'));
+    }
+
+    // Update course
+    public function update(Request $request, Course $course)
+    {
+        $request->validate([
+            'course_code' => 'required|unique:courses,course_code,' . $course->id,
+            'name' => 'required',
+            'credit_hours' => 'required|integer|min:1',
+            'max_students' => 'required|integer|min:1',
+            'semester' => 'required',
+            'lecturer_id' => 'nullable|exists:lecturers,id'
+        ]);
+
+        $course->update([
+            'course_code' => $request->course_code,
+            'title' => $request->name,
+            'credit_hours' => $request->credit_hours,
+            'max_students' => $request->max_students,
+            'semester' => $request->semester,
+            'lecturer_id' => $request->lecturer_id
+        ]);
+
+        return redirect()->route('admin.courses')->with('success', 'Course updated successfully!');
+    }
+
+    // Delete course
+    public function destroy(Course $course)
+    {
+        $course->delete();
+        return redirect()->route('admin.courses')->with('success', 'Course deleted successfully!');
+    }
+
+    // Approve/Reject pending registrations
+    public function amendRegistration(Registration $reg, Request $request)
+    {
+        $request->validate([
+            'action' => 'required|in:approve,reject'
+        ]);
+
+        if ($request->action === 'approve') {
+            $reg->update(['status' => 'approved']);
+            
+            // Send approval email to student
+            try {
+                Mail::to($reg->student->user->email)->send(new RegistrationApproved($reg->course));
+                Log::info("Approval email sent to: " . $reg->student->user->email);
+            } catch (\Exception $e) {
+                Log::error("Failed to send approval email: " . $e->getMessage());
+            }
+            
+            $message = 'Registration approved and notification sent to student!';
+        } else {
+            $reg->update(['status' => 'cancelled']);
+            $message = 'Registration cancelled!';
+        }
+
+        return redirect()->back()->with('success', $message);
+    }
+}
