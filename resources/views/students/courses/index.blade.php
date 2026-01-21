@@ -21,17 +21,19 @@
                         </option>
                     @endfor
                 </select>
+                <div class="form-check mt-2">
+                    <input class="form-check-input" type="checkbox" name="include_previous" value="1" id="includePrev" {{ request()->boolean('include_previous') ? 'checked' : '' }}>
+                    <label class="form-check-label" for="includePrev">Include previous semester</label>
+                </div>
             </div>
             <div class="col-md-2">
                 <button type="submit" class="btn btn-outline-secondary w-100">Filter</button>
             </div>
         </div>
     </form>
-
-    <!-- Course Cards -->
-    <div class="row">
+    <div class="row" id="coursesContainer">
         @forelse($courses as $course)
-        <div class="col-md-6 col-lg-4 mb-3">
+        <div class="col-md-6 col-lg-4 mb-3 course-card" data-searchable="{{ $course->course_code }} {{ $course->title }}">
             <div class="card h-100">
                 <div class="card-body">
                     <h5 class="card-title">{{ $course->course_code }}</h5>
@@ -39,7 +41,8 @@
                         <strong>{{ $course->title }}</strong><br>
                         Semester: {{ $course->semester }}<br>
                         Credit: {{ $course->credit_hours }} | Max Students: {{ $course->max_students }}<br>
-                        <small class="text-muted">Enrolled: {{ $course->registrations->where('status', 'approved')->count() }} / {{ $course->max_students }}</small>
+                        <small class="text-muted">Enrolled: {{ $course->registrations->where('status', 
+                                                              'approved')->count() }} / {{ $course->max_students }}</small>
                     </p>
 
                     @php

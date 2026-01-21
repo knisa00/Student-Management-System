@@ -1,4 +1,3 @@
-<!-- resources/views/students/courses/show.blade.php -->
 @extends('layouts.app')
 
 @section('content')
@@ -6,23 +5,32 @@
     <div class="col-md-8">
         <div class="card shadow-sm">
             <div class="card-header bg-white d-flex justify-content-between align-items-center">
-                <h5 class="mb-0">{{ $course->course_code }} - {{ $course->title }}</h5>
-                <a href="{{ route('student.courses.index') }}" class="btn btn-sm btn-outline-secondary">Back to Courses</a>
+                <h5 class="mb-0">
+                    {{ $course->course_code }} (Section {{ $course->section }}) - {{ $course->title }}
+                </h5>
+                <a href="{{ route('student.courses.index') }}" class="btn btn-sm btn-outline-secondary">
+                    Back to Courses
+                </a>
             </div>
+
             <div class="card-body">
                 <div class="row mb-4">
                     <div class="col-md-6">
                         <p><strong>Credits:</strong> {{ $course->credit_hours }}</p>
                         <p><strong>Semester:</strong> {{ $course->semester }}</p>
                         <p><strong>Max Students:</strong> {{ $course->max_students }}</p>
+                        <p><strong>Section:</strong> {{ $course->section }}</p>
                     </div>
+
                     <div class="col-md-6">
                         @php
-                            $registration = $course->registrations->where('student_id', auth()->user()->student->id)->first();
+                            $registration = $course->registrations
+                                ->where('student_id', auth()->user()->student->id)
+                                ->first();
                         @endphp
 
-                        @if($registration)
-                            <p><strong>Status:</strong>
+                        <p><strong>Status:</strong>
+                            @if($registration)
                                 @if($registration->status === 'approved')
                                     <span class="badge bg-success">Approved</span>
                                 @elseif($registration->status === 'pending')
@@ -30,42 +38,45 @@
                                 @else
                                     <span class="badge bg-secondary">Cancelled</span>
                                 @endif
-                            </p>
-                        @else
-                            <p><strong>Status:</strong> Not Registered</p>
-                        @endif
+                            @else
+                                Not Registered
+                            @endif
+                        </p>
                     </div>
                 </div>
 
-                <!-- Register/Cancel Button -->
+                <!-- Register / Cancel -->
                 <div class="mt-3">
-                    @if($registration)
-                        @if(in_array($registration->status, ['approved', 'pending']))
-                            <form action="{{ route('cancel.registration', $registration) }}" method="POST" class="d-inline">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="btn btn-sm btn-outline-danger"
-                                        onclick="return confirm('Cancel this registration?')">
-                                    Cancel Registration
-                                </button>
-                            </form>
-                        @endif
-                    @else
-                        <form action="{{ route('register', $course) }}" method="POST">
+                    @if($registration && in_array($registration->status, ['approved','pending']))
+                        <form action="{{ route('student.cancel.registration', $registration) }}" method="POST">
                             @csrf
-                            <button type="submit" class="btn btn-primary">Register for This Course</button>
+                            @method('DELETE')
+                            <button class="btn btn-outline-danger btn-sm"
+                                    onclick="return confirm('Cancel this registration?')">
+                                Cancel Registration
+                            </button>
+                        </form>
+                    @elseif(!$registration)
+                        <form action="{{ route('student.register', $course->id) }}" method="POST">
+                            @csrf
+                            <button class="btn btn-primary">Register for This Course</button>
                         </form>
                     @endif
                 </div>
 
-                <!-- Current Enrolled Students (Optional) -->
+                <!-- Enrolled Students -->
                 <div class="mt-4">
-                    <h6>Enrolled Students ({{ $course->registrations->where('status', 'approved')->count() }} / {{ $course->max_students }})</h6>
+                    <h6>
+                        Enrolled Students
+                        ({{ $course->registrations->where('status','approved')->count() }}
+                        / {{ $course->max_students }})
+                    </h6>
+
                     <ul class="list-group">
-                        @forelse($course->registrations->where('status', 'approved') as $reg)
-                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                        @forelse($course->registrations->where('status','approved') as $reg)
+                            <li class="list-group-item d-flex justify-content-between">
                                 {{ $reg->student->full_name }}
-                                <span class="badge bg-primary rounded-pill">{{ $reg->student->matric_no }}</span>
+                                <span class="badge bg-primary">{{ $reg->student->matric_no }}</span>
                             </li>
                         @empty
                             <li class="list-group-item">No students enrolled yet.</li>

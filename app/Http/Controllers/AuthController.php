@@ -96,6 +96,7 @@ class AuthController extends Controller
                         'programme' => $request->programme,
                         'year' => $request->year,
                         'full_name' => $user->name, // use user's name
+                        'semester' => null, // Will be assigned later by admin
                     ]);
                     break;
 
@@ -104,6 +105,7 @@ class AuthController extends Controller
                         'user_id' => $user->id,
                         'staff_no' => $request->staff_no,
                         'department' => $request->department,
+                        'full_name' => $user->name, // use user's name
                     ]);
                     break;
 

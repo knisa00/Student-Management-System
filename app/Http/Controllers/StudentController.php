@@ -19,7 +19,27 @@ class StudentController extends Controller
         }
 
         $registrations = $student->registrations()->with('course')->get();
-        return view('students.dashboard', compact('student','registrations'));
+
+        // Separate registrations by current and previous semester
+        $currentSemester = $student->semester ?? 1;
+        $previousSemester = max(1, $currentSemester - 1);
+
+        $currentRegistrations = $registrations->filter(function($reg) use ($currentSemester) {
+            return (int)$reg->course->semester === (int)$currentSemester;
+        });
+
+        $previousRegistrations = $registrations->filter(function($reg) use ($previousSemester, $currentSemester) {
+            return (int)$reg->course->semester === (int)$previousSemester && (int)$previousSemester !== (int)$currentSemester;
+        });
+
+        $otherRegistrations = $registrations->filter(function($reg) use ($currentSemester, $previousSemester) {
+            return (int)$reg->course->semester !== (int)$currentSemester && (int)$reg->course->semester !== (int)$previousSemester;
+        });
+
+        // Get unique semesters from other registrations for dropdown
+        $otherSemesters = $otherRegistrations->pluck('course.semester')->unique()->sort()->values();
+
+        return view('students.dashboard', compact('student', 'currentRegistrations', 'previousRegistrations', 'otherRegistrations', 'otherSemesters'));
     }
 
     public function registerCourse(Request $request, $course_id)

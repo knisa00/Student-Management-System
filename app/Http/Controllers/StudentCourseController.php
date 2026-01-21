@@ -15,8 +15,16 @@ class StudentCourseController extends Controller
         // If semester is selected in filter, use that; otherwise use student's semester
         if ($request->filled('semester')) {
             $query->where('semester', $request->semester);
-        } elseif ($student->semester) {
-            $query->where('semester', $student->semester);
+        } else {
+            if ($student->semester) {
+                // Optionally include previous semester when requested
+                if ($request->boolean('include_previous')) {
+                    $prev = max(1, intval($student->semester) - 1);
+                    $query->whereIn('semester', [$student->semester, $prev]);
+                } else {
+                    $query->where('semester', $student->semester);
+                }
+            }
         }
 
         if ($request->filled('search')) {

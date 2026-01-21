@@ -22,5 +22,11 @@ class Student extends Model
     public function courses() {
         return $this->belongsToMany(\App\Models\Course::class, 'registrations');
     }
+
+    // Ensure student full_name is saved in uppercase
+    public function setFullNameAttribute($value)
+    {
+        $this->attributes['full_name'] = $value ? mb_strtoupper($value) : $value;
+    }
 }
 

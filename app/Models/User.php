@@ -9,7 +9,6 @@ use Illuminate\Notifications\Notifiable;
 
 class User extends Authenticatable
 {
-    /** @use HasFactory<\Database\Factories\UserFactory> */
     use HasFactory, Notifiable;
 
     /**
@@ -53,5 +52,11 @@ class User extends Authenticatable
     
     public function lecturer() {
         return $this->hasOne(\App\Models\Lecturer::class);
+    }
+
+    // Ensure user name is saved in uppercase
+    public function setNameAttribute($value)
+    {
+        $this->attributes['name'] = $value ? mb_strtoupper($value) : $value;
     }
 }

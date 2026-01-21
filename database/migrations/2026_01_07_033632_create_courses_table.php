@@ -16,6 +16,7 @@ return new class extends Migration
             $table->integer('max_students');
             $table->string('semester');
             $table->foreignId('lecturer_id')->nullable()->constrained('lecturers')->nullOnDelete();
+            $table->integer('section')->after('course_code');
             $table->timestamps();
         });
     }

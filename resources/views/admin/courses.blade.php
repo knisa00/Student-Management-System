@@ -31,6 +31,10 @@
                         <input type="number" name="credit_hours" id="credit_hours" class="form-control" required min="1">
                     </div>
                     <div class="mb-3">
+                        <label class="form-label">Section</label>
+                        <input type="text" name="section" class="form-control" placeholder="e.g. 01" required>
+                    </div>
+                    <div class="mb-3">
                         <label for="max_students" class="form-label">Max Students</label>
                         <input type="number" name="max_students" id="max_students" class="form-control" required min="1">
                     </div>
@@ -72,6 +76,7 @@
                                     <th>Code</th>
                                     <th>Title</th>
                                     <th>Credit Hours</th>
+                                    <th>Section</th> 
                                     <th>Max Students</th>
                                     <th>Semester</th>
                                     <th>Lecturer</th>
@@ -84,6 +89,7 @@
                                     <td>{{ $course->course_code }}</td>
                                     <td>{{ $course->title }}</td>
                                     <td>{{ $course->credit_hours }}</td>
+                                    <td>{{ $course->section }}</td>
                                     <td>{{ $course->max_students }}</td>
                                     <td>{{ $course->semester }}</td>
                                     <td>{{ $course->lecturer ? $course->lecturer->user->name : 'Unassigned' }}</td>

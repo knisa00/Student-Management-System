@@ -26,6 +26,10 @@
                         <input type="number" name="credit_hours" id="credit_hours" class="form-control" value="{{ $course->credit_hours }}" required min="1">
                     </div>
                     <div class="mb-3">
+                        <label class="form-label">Section</label>
+                        <input type="text" name="section" class="form-control" value="{{ $course->section }}" required>
+                    </div>
+                    <div class="mb-3">
                         <label for="max_students" class="form-label">Max Students</label>
                         <input type="number" name="max_students" id="max_students" class="form-control" value="{{ $course->max_students }}" required min="1">
                     </div>

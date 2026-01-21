@@ -29,6 +29,9 @@ Route::middleware(['auth', 'role:student'])->prefix('student')->name('student.')
     Route::get('/courses/{course}', [StudentCourseController::class, 'show'])->name('courses.show');
     Route::post('/register/{course}', [RegistrationController::class, 'store'])->name('register');
     Route::delete('/cancel/{registration}', [RegistrationController::class, 'destroy'])->name('cancel.registration');
+    // Registration modification routes
+    Route::get('/registrations/{registration}/edit', [RegistrationController::class, 'edit'])->name('registrations.edit');
+    Route::put('/registrations/{registration}', [RegistrationController::class, 'update'])->name('registrations.update');
     Route::get('/profile/edit', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
 });
@@ -53,15 +56,6 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->name('admin.')->grou
     Route::get('/students', [AdminController::class, 'students'])->name('students');
     Route::get('/registrations', [AdminController::class, 'registrations'])->name('registrations');
 });
-
-
-// Route::get('/test-mail', function () {
-//     Mail::raw('This is a test email from Laravel!', function ($message) {
-//         $message->to('knisa74800@gmail.com')
-//                 ->subject('Test Email');
-//     });
-//     return 'Email sent!';
-// });
 
 Route::get('/test-email', function () {
     $course = \App\Models\Course::first();

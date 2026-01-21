@@ -15,4 +15,10 @@ class Admin extends Model
     {
         return $this->belongsTo(User::class);
     }
+
+    // Ensure admin full_name is saved in uppercase
+    public function setFullNameAttribute($value)
+    {
+        $this->attributes['full_name'] = $value ? mb_strtoupper($value) : $value;
+    }
 }

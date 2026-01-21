@@ -7,7 +7,9 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Log;
 use App\Models\Course;
 use App\Models\Registration;
+use App\Models\Notification;
 use App\Mail\RegistrationApproved;
+use App\Mail\RegistrationCancelled;
 
 class AdminController extends Controller
 {
@@ -81,6 +83,7 @@ class AdminController extends Controller
 
         $course->update([
             'course_code' => $request->course_code,
+            'section' => $request->section,
             'title' => $request->name,
             'credit_hours' => $request->credit_hours,
             'max_students' => $request->max_students,
@@ -98,28 +101,64 @@ class AdminController extends Controller
         return redirect()->route('admin.courses')->with('success', 'Course deleted successfully!');
     }
 
-    // Approve/Reject pending registrations
+    // Approve/Reject/Cancel pending registrations
     public function amendRegistration(Registration $reg, Request $request)
     {
         $request->validate([
             'action' => 'required|in:approve,reject'
         ]);
 
+        $course = $reg->course;
+        $student = $reg->student;
+
         if ($request->action === 'approve') {
-            $reg->update(['status' => 'approved']);
-            
-            // Send approval email to student
-            try {
-                Mail::to($reg->student->user->email)->send(new RegistrationApproved($reg->course));
-                Log::info("Approval email sent to: " . $reg->student->user->email);
-            } catch (\Exception $e) {
-                Log::error("Failed to send approval email: " . $e->getMessage());
+            $approvedCount = $course->registrations()->where('status', 'approved')->count();
+
+            // Check if course is full
+            if ($approvedCount >= $course->max_students) {
+                return redirect()->back()->with('error', "Cannot approve: {$course->course_code} is at capacity ({$approvedCount}/{$course->max_students}). Registration remains pending.");
             }
-            
-            $message = 'Registration approved and notification sent to student!';
+
+            // Approve the registration
+            $reg->update(['status' => 'approved']);
+
+            // Create notification for student
+            Notification::create([
+                'user_id' => $student->user->id,
+                'type' => 'student',
+                'message' => "Your registration for {$course->course_code} has been approved by admin.",
+            ]);
+
+            // Queue approval email to student
+            try {
+                Mail::to($student->user->email)->queue(new RegistrationApproved($course));
+                Log::info("Approval email queued for: " . $student->user->email);
+            } catch (\Exception $e) {
+                Log::error("Failed to queue approval email: " . $e->getMessage());
+            }
+
+            $message = "✅ Registration approved for {$student->user->name} - {$course->course_code}";
+
         } else {
+            // Cancel the registration
             $reg->update(['status' => 'cancelled']);
-            $message = 'Registration cancelled!';
+
+            // Create notification for student
+            Notification::create([
+                'user_id' => $student->user->id,
+                'type' => 'student',
+                'message' => "Your registration for {$course->course_code} has been cancelled by admin.",
+            ]);
+
+            // Queue cancellation email
+            try {
+                Mail::to($student->user->email)->queue(new RegistrationCancelled($course));
+                Log::info("Cancellation email queued for: " . $student->user->email);
+            } catch (\Exception $e) {
+                Log::error("Failed to queue cancellation email: " . $e->getMessage());
+            }
+
+            $message = "❌ Registration cancelled for {$student->user->name} - {$course->course_code}";
         }
 
         return redirect()->back()->with('success', $message);

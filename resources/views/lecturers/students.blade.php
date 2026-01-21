@@ -4,7 +4,7 @@
 @section('content')
 <div class="row">
     <div class="col-12">
-        <h2 class="mb-4">👥 Students in {{ $course->course_code }} - {{ $course->title }}</h2>
+        <h2 class="mb-4">👥 Students in {{ $course->course_code }} (Section {{ $course->section }}) - {{ $course->title }}</h2>
     </div>
 </div>
 
@@ -50,28 +50,6 @@
                                         </button>
                                     </td>
                                 </tr>
-
-                                <!-- Modal for Full Student Details -->
-                                <div class="modal fade" id="studentModal{{ $reg->student->id }}" tabindex="-1">
-                                    <div class="modal-dialog">
-                                        <div class="modal-content">
-                                            <div class="modal-header">
-                                                <h5 class="modal-title">Student Details</h5>
-                                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                                            </div>
-                                            <div class="modal-body">
-                                                <p><strong>Matric No:</strong> {{ $reg->student->matric_no }}</p>
-                                                <p><strong>Full Name:</strong> {{ $reg->student->full_name }}</p>
-                                                <p><strong>Programme:</strong> {{ $reg->student->program ?? 'N/A' }}</p>
-                                                <p><strong>Year:</strong> Year {{ $reg->student->year }}</p>
-                                                <p><strong>Email:</strong> {{ $reg->student->user->email }}</p>
-                                            </div>
-                                            <div class="modal-footer">
-                                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
                                 @endforeach
                             </tbody>
                         </table>
@@ -81,4 +59,28 @@
         </div>
     </div>
 </div>
+
+<!-- All Modals (Outside Table) -->
+@foreach($course->registrations as $reg)
+<div class="modal fade" id="studentModal{{ $reg->student->id }}" tabindex="-1" aria-labelledby="studentModalLabel{{ $reg->student->id }}" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="studentModalLabel{{ $reg->student->id }}">Student Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p><strong>Matric No:</strong> {{ $reg->student->matric_no }}</p>
+                <p><strong>Full Name:</strong> {{ $reg->student->full_name }}</p>
+                <p><strong>Programme:</strong> {{ $reg->student->programme ?? 'N/A' }}</p>
+                <p><strong>Year:</strong> Year {{ $reg->student->year }}</p>
+                <p><strong>Email:</strong> {{ $reg->student->user->email }}</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+@endforeach
 @endsection
